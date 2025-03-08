@@ -1,6 +1,4 @@
 #!/bin/bash
-set -e
-set -o pipefail
 
 # Text color
 CYAN='\033[0;36m'
@@ -15,24 +13,22 @@ if ! command -v curl &> /dev/null; then
     sudo apt install curl -y
 fi
 
-# Check if psmisc is installed (for fuser)
-if ! command -v fuser &> /dev/null; then
-    sudo apt install psmisc -y
-fi
-
 # Display logo
 curl -s https://raw.githubusercontent.com/Evenorchik/evenorlogo/main/evenorlogo.sh | bash
 
 # Function to display the menu
 print_menu() {
-
+    echo -e "\n${CYAN}╔════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║         GAIA NODE MANAGER v1.0         ║${NC}"
+    echo -e "${CYAN}╚════════════════════════════════════════╝${NC}\n"
+    
     echo -e "${CYAN}Available actions:\n"
     echo -e "${CYAN}[1] -> Install node${NC}"
-    echo -e "${CYAN}[2] -> Start farming script${NC}"
+    echo -e "${CYAN}[2] -> Start bot${NC}"
     echo -e "${CYAN}[3] -> Update node${NC}"
     echo -e "${CYAN}[4] -> Node info${NC}"
     echo -e "${CYAN}[5] -> Delete node${NC}"
-    echo -e "${CYAN}[6] -> Delete farming script${NC}\n"
+    echo -e "${CYAN}[6] -> Delete bot${NC}\n"
 }
 
 # Display menu
@@ -62,10 +58,9 @@ case $choice in
         
         echo -e "${CYAN}[4/6] -> Setting environment variables...${NC}"
         echo "export PATH=\$PATH:$HOME/gaianet/bin" >> "$HOME/.bashrc"
-        # Immediately export the new PATH in the current session
         export PATH="$PATH:$HOME/gaianet/bin"
-        sleep 10
-        
+        sleep 5
+
         if ! command -v gaianet &> /dev/null; then
             echo -e "${CYAN}Error: gaianet not found! $HOME/gaianet/bin not added to PATH.${NC}"
             exit 1
@@ -112,33 +107,28 @@ EOF
         echo -e "${CYAN}Enter your node address:${NC}"
         read -p "-> " NODE_ID
         
-        if [ -z "$NODE_ID" ]; then
-            echo -e "${CYAN}Error: Node address cannot be empty.${NC}"
-            exit 1
-        fi
-        
-        sed -i "s|\$NODE_ID|${NODE_ID}|g" gaia_bot.py
+        sed -i "s|\$NODE_ID|$NODE_ID|g" gaia_bot.py
 
         USERNAME=$(whoami)
         HOME_DIR=$(eval echo ~$USERNAME)
 
         echo -e "${CYAN}[4/4] -> Setting up and starting service...${NC}"
-        # Use sudo tee to create the service file
-        cat <<EOF | sudo tee /etc/systemd/system/gaia-bot.service
+        # Service for starting the bot
+        cat > /etc/systemd/system/gaia-bot.service <<EOF
 [Unit]
 Description=Gaia Bot
 After=network.target
 
 [Service]
-Environment=NODE_ID=${NODE_ID}
+Environment=NODE_ID=$NODE_ID
 Environment=RETRY_COUNT=3
 Environment=RETRY_DELAY=5
 Environment=TIMEOUT=60
-ExecStart=/usr/bin/python3 ${HOME_DIR}/gaia-bot/gaia_bot.py
+ExecStart=/usr/bin/python3 $HOME_DIR/gaia-bot/gaia_bot.py
 Restart=always
-User=${USERNAME}
-Group=${USERNAME}
-WorkingDirectory=${HOME_DIR}/gaia-bot
+User=$USERNAME
+Group=$USERNAME
+WorkingDirectory=$HOME_DIR/gaia-bot
 
 [Install]
 WantedBy=multi-user.target
