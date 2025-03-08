@@ -56,6 +56,7 @@ case $choice in
         echo -e "${CYAN}[4/6] -> Setting environment variables...${NC}"
         echo "export PATH=\$PATH:$HOME/gaianet/bin" >> "$HOME/.bashrc"
         export PATH="$PATH:$HOME/gaianet/bin"
+        source ~/.bashrc
         sleep 5
 
         if ! command -v gaianet &> /dev/null; then
