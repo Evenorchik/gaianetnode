@@ -18,17 +18,14 @@ curl -s https://raw.githubusercontent.com/Evenorchik/evenorlogo/main/evenorlogo.
 
 # Function to display the menu
 print_menu() {
-    echo -e "\n${CYAN}╔════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║         GAIA NODE MANAGER v1.0         ║${NC}"
-    echo -e "${CYAN}╚════════════════════════════════════════╝${NC}\n"
-    
+
     echo -e "${CYAN}Available actions:\n"
     echo -e "${CYAN}[1] -> Install node${NC}"
-    echo -e "${CYAN}[2] -> Start bot${NC}"
+    echo -e "${CYAN}[2] -> Start farming script${NC}"
     echo -e "${CYAN}[3] -> Update node${NC}"
     echo -e "${CYAN}[4] -> Node info${NC}"
     echo -e "${CYAN}[5] -> Delete node${NC}"
-    echo -e "${CYAN}[6] -> Delete bot${NC}\n"
+    echo -e "${CYAN}[6] -> Delete farming script${NC}\n"
 }
 
 # Display menu
