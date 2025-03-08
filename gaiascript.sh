@@ -98,7 +98,7 @@ EOF
         echo -e "system\nuser\nassistant\ntool" > roles.txt
 
         echo -e "${CYAN}[2/4] -> Downloading bot script...${NC}"
-        curl -L https://raw.githubusercontent.com/Evenor_soft/NodeRunnerScripts/main/gaia_bot.py -o gaia_bot.py
+        curl -L https://raw.githubusercontent.com/Evenorchik/gaianetnode/refs/heads/main/gaia_bot.py -o gaia_bot.py
 
         echo -e "${CYAN}[3/4] -> Configuring bot...${NC}"
         echo -e "${CYAN}Enter your node address:${NC}"
