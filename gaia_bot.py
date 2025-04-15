@@ -21,14 +21,16 @@ logger = logging.getLogger(__name__)
 class GaiaBot:
     def __init__(self):
         """Bot initialization."""
-        # Check for required environment variables
-        self.node_id = os.getenv("NODE_ID")
-        if not self.node_id:
-            logger.error("Error: NODE_ID not specified in environment variables!")
+        # Get domain link from environment variable or prompt the user
+        self.domain = os.getenv("DOMAIN")
+        if not self.domain:
+            self.domain = input("Enter the Gaia domain link (e.g. mydomain.gaia.domains): ").strip()
+        if not self.domain:
+            logger.error("Error: Domain link not provided!")
             sys.exit(1)
-
-        # Configure URL and headers
-        self.url = f"https://{self.node_id}.gaia.domains/v1/chat/completions"
+            
+        # Configure URL and headers: Construct the URL by appending the chat completions endpoint
+        self.url = f"https://{self.domain}/v1/chat/completions"
         self.headers = {
             "accept": "application/json",
             "Content-Type": "application/json"
@@ -39,7 +41,7 @@ class GaiaBot:
         self.retry_delay = int(os.getenv("RETRY_DELAY", "5"))
         self.timeout = int(os.getenv("TIMEOUT", "60"))
 
-        # Initialize variables
+        # Initialize variables for roles, phrases, and session
         self.roles: List[str] = []
         self.phrases: List[str] = []
         self.session: Optional[aiohttp.ClientSession] = None
@@ -74,8 +76,10 @@ class GaiaBot:
             "role": "user",
             "content": random.choice(self.phrases)
         }
+        # Choose a role randomly from roles list (excluding 'user')
+        other_roles = [r for r in self.roles if r.lower() != "user"]
         other_message = {
-            "role": random.choice([r for r in self.roles if r != "user"]),
+            "role": random.choice(other_roles) if other_roles else "assistant",
             "content": random.choice(self.phrases)
         }
         return [user_message, other_message]
@@ -107,7 +111,11 @@ class GaiaBot:
 
     def log_success(self, question: str, result: Dict) -> None:
         """Log a successful response."""
-        response = result["choices"][0]["message"]["content"]
+        try:
+            response = result["choices"][0]["message"]["content"]
+        except (KeyError, IndexError) as e:
+            logger.error(f"Error parsing response: {e}")
+            response = "N/A"
         logger.info(f"Question: {question}")
         logger.info(f"Answer: {response}")
         logger.info("=" * 50)
